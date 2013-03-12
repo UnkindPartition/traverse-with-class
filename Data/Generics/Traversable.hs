@@ -12,7 +12,7 @@ class ctx a => GTraversable (ctx :: * -> Constraint) a where
     :: Applicative f
     => proxy ctx
     -> (forall d . GTraversable ctx d => d -> f d)
-    -> a -> f d
+    -> a -> f a
 
 gmap
   :: GTraversable ctx a
