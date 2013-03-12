@@ -1,0 +1,113 @@
+{-# LANGUAGE TemplateHaskell #-}
+-- | For the generated instances you'll typically need the following
+-- extensions:
+--
+-- >{-# LANGUAGE TemplateHaskell, MultiParamTypeClasses, FlexibleInstances, ConstraintKinds, UndecidableInstances #-}
+module Data.Generics.Traversable.TH
+  ( deriveGTraversable
+  , gtraverseExpr
+  ) where
+
+import Language.Haskell.TH
+import Control.Monad
+import Data.Generics.Traversable
+import Control.Applicative
+
+err s = error $ "Data.Generics.Traversable.TH: " ++ s
+
+getDataInfo name = do
+  info <- reify name
+  let
+    decl =
+      case info of
+        TyConI d -> d
+        _ -> error ("can't be used on anything but a type constructor of an algebraic data type")
+
+  return $
+    case decl of
+      DataD    _ n ps cs _ -> (n, map varName ps, map conA cs)
+      NewtypeD _ n ps c  _ -> (n, map varName ps, [conA c])
+      _ -> err ("not a data type declaration: " ++ show decl)
+
+-- | Return a lambda expression which implements 'gtraverse' for the given
+-- data type.
+gtraverseExpr :: Name -> Q Exp
+gtraverseExpr typeName = do
+  (typeName, typeParams, constructors) <- getDataInfo typeName
+  f <- newName "f"
+  x <- newName "x"
+  ctx <- newName "ctx"
+
+  let
+    lam = lamE [varP ctx, varP f, varP x] $ caseE (varE x) matches
+
+    -- Con a1 ... -> pure Con <*> f a1 <*> ...
+    mkMatch (c, n)
+     = do args <- replicateM n (newName "arg")
+          let
+            applyF e arg =
+              varE '(<*>) `appE` e `appE`
+                (varE f `appE` varE ctx `appE` varE arg)
+            body = foldl applyF [| $(varE 'pure) $(conE c) |] args
+          match (conP c $ map varP args) (normalB body) []
+    matches = map mkMatch constructors
+
+  lam
+
+-- | Example usage:
+--
+-- >data MyType = MyType
+-- >
+-- >deriveGTraversable ''MyType
+--
+-- It tries to create the necessary instance constraints, but is not very
+-- smart about it For tricky types, it may fail or produce an
+-- overconstrained instance. In that case, write the instance declaration
+-- yourself and use 'gtraverseExpr' to derive the implementation:
+--
+-- >data MyType a = MyType
+-- >
+-- >instance GTraversable (MyType a) where
+-- >  gtraverse = $(gtraverseExpr ''MyType)
+deriveGTraversable :: Name -> Q [Dec]
+deriveGTraversable name = do
+  info <- reify name
+  ctx <- newName "cxt"
+
+  let
+    decl =
+      case info of
+        TyConI d -> d
+        _ -> error ("can't be used on anything but a type constructor of an algebraic data type")
+
+    (typeName, typeParams, _) =
+      case decl of
+        DataD    _ n ps cs _ -> (n, map varName ps, map conA cs)
+        NewtypeD _ n ps c  _ -> (n, map varName ps, [conA c])
+        _ -> err ("not a data type declaration: " ++ show decl)
+
+    appliedType = foldl appT (conT typeName) $ map varT typeParams
+
+    -- instance (...) => GTraversable ctx MyType where { ... }
+    inst =
+      instanceD context (conT ''GTraversable `appT` varT ctx `appT` appliedType) [ do
+          -- gtraverse = ...
+          funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ] 
+        ]
+
+    context = cxt $ concatMap mkCxt typeParams
+
+    mkCxt name =
+      let tv = varT name
+      in [ classP ''GTraversable [varT ctx, tv]
+         , classP ctx [tv]
+         ]
+
+  sequence [inst]
+
+conA (NormalC c xs)   = (c, length xs)
+conA (InfixC x1 c x2) = conA (NormalC c [x1, x2])
+conA (ForallC _ _ c)  = conA c
+conA (RecC c xs)      = (c, length xs)
+varName (PlainTV n) = n
+varName (KindedTV n _) = n
