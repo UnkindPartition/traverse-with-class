@@ -20,28 +20,28 @@ gmap
   => p c
   -> (forall d . (GTraversable c d, c d) => p c -> d -> d)
   -> a -> a
-gmap c f = runIdentity . gtraverse c (\c -> Identity . f c)
+gmap c f = runIdentity . gtraverse c (const $ Identity . f c)
 
 gmapM
   :: (Monad m, GTraversable c a)
   => p c
   -> (forall d . (GTraversable c d, c d) => p c -> d -> m d)
   -> a -> m a
-gmapM c f = unwrapMonad . gtraverse c (\c -> WrapMonad . f c)
+gmapM c f = unwrapMonad . gtraverse c (const $ WrapMonad . f c)
 
 gfoldMap
   :: (Monoid r, GTraversable c a)
   => p c
   -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
   -> a -> r
-gfoldMap c f = getConstant . gtraverse c (\c -> Constant . f c)
+gfoldMap c f = getConstant . gtraverse c (const $ Constant . f c)
 
 gfoldr
   :: GTraversable c a
   => p c
   -> (forall d . (GTraversable c d, c d) => p c -> d -> r -> r)
   -> r -> a -> r
-gfoldr c f z t = appEndo (gfoldMap c (\c -> Endo . f c) t) z
+gfoldr c f z t = appEndo (gfoldMap c (const $ Endo . f c) t) z
 
 gfoldl'
   :: GTraversable c a
