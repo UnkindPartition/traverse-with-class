@@ -36,10 +36,9 @@ gtraverseExpr typeName = do
   (typeName, typeParams, constructors) <- getDataInfo typeName
   f <- newName "f"
   x <- newName "x"
-  ctx <- newName "ctx"
 
   let
-    lam = lamE [varP ctx, varP f, varP x] $ caseE (varE x) matches
+    lam = lamE [varP f, varP x] $ caseE (varE x) matches
 
     -- Con a1 ... -> pure Con <*> f a1 <*> ...
     mkMatch (c, n)
@@ -47,7 +46,7 @@ gtraverseExpr typeName = do
           let
             applyF e arg =
               varE '(<*>) `appE` e `appE`
-                (varE f `appE` varE ctx `appE` varE arg)
+                (varE f `appE` varE arg)
             body = foldl applyF [| $(varE 'pure) $(conE c) |] args
           match (conP c $ map varP args) (normalB body) []
     matches = map mkMatch constructors

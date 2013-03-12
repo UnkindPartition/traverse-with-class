@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams #-}
 -- | All of the functions below work only on «interesting» subterms.
 -- It is up to the instance writer to decide which subterms are
 -- interesting and which subterms should count as immediate. This can
@@ -57,84 +57,73 @@ class GTraversable (c :: * -> Constraint) a where
   -- Other subterms are lifted using 'pure', and the whole structure is
   -- folded back using '<*>'.
   gtraverse
-    :: Applicative f
-    => p c
-    -> (forall d . (GTraversable c d, c d) => p c -> d -> f d)
+    :: (Applicative f, ?c :: p c)
+    => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> f d)
     -> a -> f a
 
 -- | Generic map over the immediate subterms
 gmap
-  :: GTraversable c a
-  => p c
-  -> (forall d . (GTraversable c d, c d) => p c -> d -> d)
+  :: (GTraversable c a, ?c :: p c)
+  => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> d)
   -> a -> a
-gmap c f = runIdentity . gtraverse c (const $ Identity . f c)
+gmap f = runIdentity . gtraverse (Identity . f)
 
 -- | Generic monadic map over the immediate subterms
 gmapM
-  :: (Monad m, GTraversable c a)
-  => p c
-  -> (forall d . (GTraversable c d, c d) => p c -> d -> m d)
+  :: (Monad m, GTraversable c a, ?c :: p c)
+  => (forall d . (GTraversable c d, c d) => d -> m d)
   -> a -> m a
-gmapM c f = unwrapMonad . gtraverse c (const $ WrapMonad . f c)
+gmapM f = unwrapMonad . gtraverse (WrapMonad . f)
 
 -- | Generic monoidal fold over the immediate subterms (cf. 'foldMap' from
 -- "Data.Foldable")
 gfoldMap
-  :: (Monoid r, GTraversable c a)
-  => p c
-  -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
+  :: (Monoid r, GTraversable c a, ?c :: p c)
+  => (forall d . (GTraversable c d, c d) => d -> r)
   -> a -> r
-gfoldMap c f = getConstant . gtraverse c (const $ Constant . f c)
+gfoldMap f = getConstant . gtraverse (Constant . f)
 
 -- | Generic right fold over the immediate subterms
 gfoldr
-  :: GTraversable c a
-  => p c
-  -> (forall d . (GTraversable c d, c d) => p c -> d -> r -> r)
+  :: (GTraversable c a, ?c :: p c)
+  => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> r -> r)
   -> r -> a -> r
-gfoldr c f z t = appEndo (gfoldMap c (const $ Endo . f c) t) z
+gfoldr f z t = appEndo (gfoldMap (Endo . f) t) z
 
 -- | Generic strict left fold over the immediate subterms
 gfoldl'
-  :: GTraversable c a
-  => p c
-  -> (forall d . (GTraversable c d, c d) => p c -> r -> d -> r)
+  :: (GTraversable c a, ?c :: p c)
+  => (forall d . (GTraversable c d, c d, ?c :: p c) => r -> d -> r)
   -> r -> a -> r
-gfoldl' c f z0 xs = gfoldr c f' id xs z0
-  where f' c x k z = k $! f c z x
+gfoldl' f z0 xs = gfoldr f' id xs z0
+  where f' x k z = k $! f z x
 
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
-  :: (GTraversable c a, c a)
-  => p c
-  -> (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  :: (GTraversable c a, c a, ?c :: p c)
+  => (forall a. (GTraversable c a, c a) => a -> a)
   -> a -> a
-everywhere c f = f c . gmap c (const $ everywhere c f)
-
+everywhere f = f . gmap (everywhere f)
 
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
-  :: (GTraversable c a, c a)
-  => p c
-  -> (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  :: (GTraversable c a, c a, ?c :: p c)
+  => (forall a. (GTraversable c a, c a, ?c :: p c) => a -> a)
   -> a -> a
-everywhere' c f = gmap c (const $ everywhere' c f) . f c
+everywhere' f = gmap (everywhere' f) . f
 
 -- | Monadic variation on everywhere
 everywhereM
-  :: (Monad m, GTraversable c a, c a)
-  => p c
-  -> (forall a. (GTraversable c a, c a) => p c -> a -> m a)
+  :: (Monad m, GTraversable c a, c a, ?c :: p c)
+  => (forall a. (GTraversable c a, c a, ?c :: p c) => a -> m a)
   -> a -> m a
-everywhereM c f = f c <=< gmapM c (const $ everywhereM c f)
+everywhereM f = f <=< gmapM (everywhereM f)
 
 -- | Strict left fold over all elements, top-down
 everything
-  :: (GTraversable c a, c a)
-  => p c
-  -> (r -> r -> r)
-  -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
+  :: (GTraversable c a, c a, ?c :: p c)
+  => (r -> r -> r)
+  -> (forall d . (GTraversable c d, c d, ?c :: p c) => d -> r)
   -> a -> r
-everything c combine f x =
-  gfoldl' c (\_ a y -> combine a (everything c combine f y)) (f c x) x
+everything combine f x =
+  gfoldl' (\a y -> combine a (everything combine f y)) (f x) x
