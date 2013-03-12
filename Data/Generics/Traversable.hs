@@ -12,19 +12,27 @@ class ctx a => GTraversable (ctx :: * -> Constraint) a where
     :: Applicative f
     => proxy ctx
     -> (forall d . GTraversable ctx d => d -> f d)
-    ->                                   a -> f d
+    -> a -> f d
 
-type GenericT ctx = forall a. GTraversable ctx a => a -> a
-type GenericM m ctx = forall a. GTraversable ctx a => a -> m a
-type GenericQ ctx r = forall a. GTraversable ctx a => a -> r
-
-gmap :: proxy ctx -> GenericT ctx -> GenericT ctx
+gmap
+  :: GTraversable ctx a
+  => proxy ctx
+  -> (forall d . GTraversable ctx d => d -> d)
+  -> a -> a
 gmap ctx f = runIdentity . gtraverse ctx (Identity . f)
 
-gmapM :: Monad m => proxy ctx -> GenericM m ctx -> GenericM m ctx
+gmapM
+  :: (Monad m, GTraversable ctx a)
+  => proxy ctx
+  -> (forall d . GTraversable ctx d => d -> m d)
+  -> a -> m a
 gmapM ctx f = unwrapMonad . gtraverse ctx (WrapMonad . f)
 
-gfoldMap :: Monoid r => proxy ctx -> GenericQ ctx r -> GenericQ ctx r
+gfoldMap
+  :: (Monoid r, GTraversable ctx a)
+  => proxy ctx
+  -> (forall d . GTraversable ctx d => d -> r)
+  -> a -> r
 gfoldMap ctx f = getConstant . gtraverse ctx (Constant . f)
 
 gfoldr
