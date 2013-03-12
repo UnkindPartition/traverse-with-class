@@ -1,12 +1,22 @@
 {-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances #-}
 -- | All of the functions below work only on «interesting» subterms.
---
 -- It is up to the instance writer to decide which subterms are
 -- interesting and which subterms should count as immediate. This can
 -- also depend on the context @c@.
 --
--- The context, denoted @c@, is a constraint that provides additional
--- facilities to work with the data.
+-- The context, denoted @c@, is a constraint (of kind @* -> Constraint@)
+-- that provides additional facilities to work with the data. Most
+-- functions take an argument of type @p c@ as an argument; it's used to
+-- disambugate which context you are referring to. @p@ can be 'Proxy' from
+-- the @tagged@ package or any other suitable type constructor.
+--
+-- For more information, see:
+--
+-- [Scrap your boilerplate with class]
+-- <http://research.microsoft.com/en-us/um/people/simonpj/papers/hmap/>
+--
+-- [Generalizing generic fold]
+-- <http://ro-che.info/articles/2013-03-11-generalizing-gfoldl.html>
 
 module Data.Generics.Traversable
   (
@@ -37,7 +47,6 @@ import Data.Functor.Constant
 -- for documentation only
 import Data.Foldable
 import Data.Traversable
-
 
 class GTraversable (c :: * -> Constraint) a where
   -- | Applicative traversal over (a subset of) immediate subterms. This is
