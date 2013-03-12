@@ -7,45 +7,45 @@ import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
 
-class GTraversable (ctx :: * -> Constraint) a where
+class GTraversable (c :: * -> Constraint) a where
   gtraverse
     :: Applicative f
-    => proxy ctx
-    -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> d -> f d)
+    => p c
+    -> (forall d . (GTraversable c d, c d) => p c -> d -> f d)
     -> a -> f a
 
 gmap
-  :: GTraversable ctx a
-  => proxy ctx
-  -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> d -> d)
+  :: GTraversable c a
+  => p c
+  -> (forall d . (GTraversable c d, c d) => p c -> d -> d)
   -> a -> a
-gmap ctx f = runIdentity . gtraverse ctx (\ctx -> Identity . f ctx)
+gmap c f = runIdentity . gtraverse c (\c -> Identity . f c)
 
 gmapM
-  :: (Monad m, GTraversable ctx a)
-  => proxy ctx
-  -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> d -> m d)
+  :: (Monad m, GTraversable c a)
+  => p c
+  -> (forall d . (GTraversable c d, c d) => p c -> d -> m d)
   -> a -> m a
-gmapM ctx f = unwrapMonad . gtraverse ctx (\ctx -> WrapMonad . f ctx)
+gmapM c f = unwrapMonad . gtraverse c (\c -> WrapMonad . f c)
 
 gfoldMap
-  :: (Monoid r, GTraversable ctx a)
-  => proxy ctx
-  -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> d -> r)
+  :: (Monoid r, GTraversable c a)
+  => p c
+  -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
   -> a -> r
-gfoldMap ctx f = getConstant . gtraverse ctx (\ctx -> Constant . f ctx)
+gfoldMap c f = getConstant . gtraverse c (\c -> Constant . f c)
 
 gfoldr
-  :: GTraversable ctx a
-  => proxy ctx
-  -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> d -> r -> r)
+  :: GTraversable c a
+  => p c
+  -> (forall d . (GTraversable c d, c d) => p c -> d -> r -> r)
   -> r -> a -> r
-gfoldr ctx f z t = appEndo (gfoldMap ctx (\ctx -> Endo . f ctx) t) z
+gfoldr c f z t = appEndo (gfoldMap c (\c -> Endo . f c) t) z
 
 gfoldl'
-  :: GTraversable ctx a
-  => proxy ctx
-  -> (forall d . (GTraversable ctx d, ctx d) => proxy ctx -> r -> d -> r)
+  :: GTraversable c a
+  => p c
+  -> (forall d . (GTraversable c d, c d) => p c -> r -> d -> r)
   -> r -> a -> r
-gfoldl' ctx f z0 xs = gfoldr ctx f' id xs z0
-  where f' ctx x k z = k $! f ctx z x
+gfoldl' c f z0 xs = gfoldr c f' id xs z0
+  where f' c x k z = k $! f c z x
