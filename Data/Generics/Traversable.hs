@@ -3,6 +3,7 @@ module Data.Generics.Traversable where
 
 import GHC.Exts (Constraint)
 import Control.Applicative
+import Control.Monad
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
@@ -49,3 +50,33 @@ gfoldl'
   -> r -> a -> r
 gfoldl' c f z0 xs = gfoldr c f' id xs z0
   where f' c x k z = k $! f c z x
+
+-- | Apply a transformation everywhere in bottom-up manner
+everywhere
+  :: (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  -> (forall a. (GTraversable c a, c a) => p c -> a -> a)
+everywhere f c = f c . gmap c (everywhere f)
+
+
+-- | Apply a transformation everywhere in top-down manner
+everywhere'
+  :: (GTraversable c a, c a)
+  => (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  -> p c -> a -> a
+everywhere' f c = gmap c (everywhere f) . f c
+
+-- | Monadic variation on everywhere
+everywhereM
+  :: (Monad m, GTraversable c a, c a)
+  => (forall a. (GTraversable c a, c a) => p c -> a -> m a)
+  -> p c -> a -> m a
+everywhereM f c = f c <=< gmapM c (everywhereM f)
+
+-- | Strict left fold over all elements, top-down
+everything
+  :: (GTraversable c a, c a)
+  => (r -> r -> r)
+  -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
+  -> p c -> a -> r
+everything combine f c x =
+  gfoldl' c (\c a y -> combine a (everything combine f c y)) (f c x) x
