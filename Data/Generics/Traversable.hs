@@ -61,22 +61,25 @@ everywhere f c = f c . gmap c (everywhere f)
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
   :: (GTraversable c a, c a)
-  => (forall a. (GTraversable c a, c a) => p c -> a -> a)
-  -> p c -> a -> a
-everywhere' f c = gmap c (everywhere f) . f c
+  => p c
+  -> (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  -> a -> a
+everywhere' c f = gmap c (const $ everywhere' c f) . f c
 
 -- | Monadic variation on everywhere
 everywhereM
   :: (Monad m, GTraversable c a, c a)
-  => (forall a. (GTraversable c a, c a) => p c -> a -> m a)
-  -> p c -> a -> m a
-everywhereM f c = f c <=< gmapM c (everywhereM f)
+  => p c
+  -> (forall a. (GTraversable c a, c a) => p c -> a -> m a)
+  -> a -> m a
+everywhereM c f = f c <=< gmapM c (const $ everywhereM c f)
 
 -- | Strict left fold over all elements, top-down
 everything
   :: (GTraversable c a, c a)
-  => (r -> r -> r)
+  => p c
+  -> (r -> r -> r)
   -> (forall d . (GTraversable c d, c d) => p c -> d -> r)
-  -> p c -> a -> r
-everything combine f c x =
-  gfoldl' c (\c a y -> combine a (everything combine f c y)) (f c x) x
+  -> a -> r
+everything c combine f x =
+  gfoldl' c (\_ a y -> combine a (everything c combine f y)) (f c x) x
