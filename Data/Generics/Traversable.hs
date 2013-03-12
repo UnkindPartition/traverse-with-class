@@ -53,9 +53,11 @@ gfoldl' c f z0 xs = gfoldr c f' id xs z0
 
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
-  :: (forall a. (GTraversable c a, c a) => p c -> a -> a)
+  :: (GTraversable c a, c a)
+  => p c
   -> (forall a. (GTraversable c a, c a) => p c -> a -> a)
-everywhere f c = f c . gmap c (everywhere f)
+  -> a -> a
+everywhere c f = f c . gmap c (const $ everywhere c f)
 
 
 -- | Apply a transformation everywhere in top-down manner
