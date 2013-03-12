@@ -1,5 +1,20 @@
 {-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances #-}
-module Data.Generics.Traversable where
+module Data.Generics.Traversable
+  ( -- * Open recursion combinators
+    GTraversable(..)
+  , gmap
+  , gmapM
+  , gfoldMap
+  , gfoldr
+  , gfoldl'
+
+    -- * Closed recursion combinators
+  , everywhere
+  , everywhere'
+  , everywhereM
+  , everything
+  )
+  where
 
 import GHC.Exts (Constraint)
 import Control.Applicative
