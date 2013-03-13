@@ -65,7 +65,7 @@ class GTraversable (c :: * -> Constraint) a where
 -- | Generic map over the immediate subterms
 gmap
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> d)
+  => (forall d . (GTraversable c d, c d) => d -> d)
   -> a -> a
 gmap f = runIdentity . gtraverse (Identity . f)
 
@@ -87,14 +87,14 @@ gfoldMap f = getConstant . gtraverse (Constant . f)
 -- | Generic right fold over the immediate subterms
 gfoldr
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> r -> r)
+  => (forall d . (GTraversable c d, c d) => d -> r -> r)
   -> r -> a -> r
 gfoldr f z t = appEndo (gfoldMap (Endo . f) t) z
 
 -- | Generic strict left fold over the immediate subterms
 gfoldl'
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d, ?c :: p c) => r -> d -> r)
+  => (forall d . (GTraversable c d, c d) => r -> d -> r)
   -> r -> a -> r
 gfoldl' f z0 xs = gfoldr f' id xs z0
   where f' x k z = k $! f z x
@@ -109,14 +109,14 @@ everywhere f = f . gmap (everywhere f)
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
   :: (GTraversable c a, c a, ?c :: p c)
-  => (forall a. (GTraversable c a, c a, ?c :: p c) => a -> a)
+  => (forall a. (GTraversable c a, c a) => a -> a)
   -> a -> a
 everywhere' f = gmap (everywhere' f) . f
 
 -- | Monadic variation on everywhere
 everywhereM
   :: (Monad m, GTraversable c a, c a, ?c :: p c)
-  => (forall a. (GTraversable c a, c a, ?c :: p c) => a -> m a)
+  => (forall a. (GTraversable c a, c a) => a -> m a)
   -> a -> m a
 everywhereM f = f <=< gmapM (everywhereM f)
 
@@ -124,7 +124,7 @@ everywhereM f = f <=< gmapM (everywhereM f)
 everything
   :: (GTraversable c a, c a, ?c :: p c)
   => (r -> r -> r)
-  -> (forall d . (GTraversable c d, c d, ?c :: p c) => d -> r)
+  -> (forall d . (GTraversable c d, c d) => d -> r)
   -> a -> r
 everything combine f x =
   gfoldl' (\a y -> combine a (everything combine f y)) (f x) x
