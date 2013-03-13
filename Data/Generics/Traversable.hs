@@ -6,9 +6,10 @@
 --
 -- The context, denoted @c@, is a constraint (of kind @* -> Constraint@)
 -- that provides additional facilities to work with the data. Most
--- functions take an argument of type @p c@ as an argument; it's used to
--- disambugate which context you are referring to. @p@ can be 'Proxy' from
--- the @tagged@ package or any other suitable type constructor.
+-- functions take an implicit parameter @?c :: p c@; it's
+-- used to disambugate which context you are referring to. @p@ can be
+-- 'Proxy' from the @tagged@ package or any other suitable type
+-- constructor.
 --
 -- For more information, see:
 --
