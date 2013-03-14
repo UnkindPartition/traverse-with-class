@@ -3,7 +3,7 @@
 -- exported by "Prelude"
 module Data.Generics.Traversable.Instances () where
 
-import Data.Generics.Traversable
+import Data.Generics.Traversable.Core
 import Data.Generics.Traversable.TH
 import Control.Applicative
 

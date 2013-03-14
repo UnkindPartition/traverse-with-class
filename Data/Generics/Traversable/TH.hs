@@ -10,7 +10,7 @@ module Data.Generics.Traversable.TH
 
 import Language.Haskell.TH
 import Control.Monad
-import Data.Generics.Traversable
+import Data.Generics.Traversable.Core
 import Control.Applicative
 
 err s = error $ "Data.Generics.Traversable.TH: " ++ s
