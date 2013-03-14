@@ -57,10 +57,14 @@ class GTraversable (c :: * -> Constraint) a where
   --
   -- Other subterms are lifted using 'pure', and the whole structure is
   -- folded back using '<*>'.
+  --
+  -- 'gtraverse' has a default implementation @const pure@, which works for
+  -- types without interesting subterms (in particular, atomic types).
   gtraverse
     :: (Applicative f, ?c :: p c)
     => (forall d . (GTraversable c d, c d, ?c :: p c) => d -> f d)
     -> a -> f a
+  gtraverse = const pure
 
 -- | Generic map over the immediate subterms
 gmap
