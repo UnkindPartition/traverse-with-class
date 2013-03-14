@@ -20,11 +20,6 @@ deriveGTraversable ''Maybe
 deriveGTraversable ''Either
 deriveGTraversable ''(,)
 deriveGTraversable ''(,,)
-deriveGTraversable ''(,,,)
-deriveGTraversable ''(,,,,)
-deriveGTraversable ''(,,,,,)
-deriveGTraversable ''(,,,,,,)
-deriveGTraversable ''(,,,,,,,)
 
 -- Uniform instance for lists
 instance (GTraversable c a, c a) => GTraversable c [a] where
