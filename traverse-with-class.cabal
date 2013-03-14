@@ -17,6 +17,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Data.Generics.Traversable
                        Data.Generics.Traversable.TH
+                       Data.Generics.Traversable.Instances
   -- other-modules:       
   build-depends:       base ==4.6.*, transformers ==0.3.*, template-haskell
   default-language:    Haskell2010
