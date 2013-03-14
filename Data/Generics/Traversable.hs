@@ -45,6 +45,8 @@ import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
 
+import {-# SOURCE #-} Data.Generics.Traversable.Instances
+
 -- for documentation only
 import Data.Foldable
 import Data.Traversable
