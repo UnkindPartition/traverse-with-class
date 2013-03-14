@@ -45,7 +45,7 @@ import Data.Functor.Identity
 import Data.Functor.Constant
 
 import Data.Generics.Traversable.Core
-import Data.Generics.Traversable.Instances
+import Data.Generics.Traversable.Instances ()
 
 -- for documentation only
 import Data.Foldable
