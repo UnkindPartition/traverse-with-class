@@ -71,7 +71,7 @@ gtraverseExpr typeName = do
 deriveGTraversable :: Name -> Q [Dec]
 deriveGTraversable name = do
   info <- reify name
-  ctx <- newName "cxt"
+  ctx <- newName "c"
 
   let
     decl =
