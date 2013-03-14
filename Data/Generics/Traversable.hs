@@ -91,21 +91,21 @@ gfoldl' f z0 xs = gfoldr f' id xs z0
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
   :: (GTraversable c a, c a, ?c :: p c)
-  => (forall a. (GTraversable c a, c a) => a -> a)
+  => (forall d. (GTraversable c d, c d) => d -> d)
   -> a -> a
 everywhere f = f . gmap (everywhere f)
 
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
   :: (GTraversable c a, c a, ?c :: p c)
-  => (forall a. (GTraversable c a, c a) => a -> a)
+  => (forall d. (GTraversable c d, c d) => d -> d)
   -> a -> a
 everywhere' f = gmap (everywhere' f) . f
 
 -- | Monadic variation on everywhere
 everywhereM
   :: (Monad m, GTraversable c a, c a, ?c :: p c)
-  => (forall a. (GTraversable c a, c a) => a -> m a)
+  => (forall d. (GTraversable c d, c d) => d -> m d)
   -> a -> m a
 everywhereM f = f <=< gmapM (everywhereM f)
 
