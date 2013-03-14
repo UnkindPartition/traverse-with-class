@@ -41,7 +41,7 @@ gtraverseExpr typeName = do
     lam = lamE [varP f, varP x] $ caseE (varE x) matches
 
     -- Con a1 ... -> pure Con <*> f a1 <*> ...
-    mkMatch (c, n)
+    mkMatch (c, n, _)
      = do args <- replicateM n (newName "arg")
           let
             applyF e arg =
@@ -82,22 +82,20 @@ deriveGTraversable name = do
     inst =
       instanceD context (conT ''GTraversable `appT` varT ctx `appT` appliedType) [ do
           -- gtraverse = ...
-          funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ] 
+          funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ]
         ]
 
-    context = cxt $ concatMap mkCxt typeParams
+    context = sequence $ gtraversableContext ++ userContext
 
-    mkCxt name =
-      let tv = varT name
-      in [ classP ''GTraversable [varT ctx, tv]
-         , classP ctx [tv]
-         ]
+    gtraversableContext = [ classP ''GTraversable [varT ctx, varT name ] | name <- typeParams ]
+
+    userContext = [ classP ctx [pure t] | (_,_,ts) <- constructors, t <- ts ]
 
   sequence [inst]
 
-conA (NormalC c xs)   = (c, length xs)
+conA (NormalC c xs)   = (c, length xs, map snd xs)
 conA (InfixC x1 c x2) = conA (NormalC c [x1, x2])
 conA (ForallC _ _ c)  = conA c
-conA (RecC c xs)      = (c, length xs)
+conA (RecC c xs)      = (c, length xs, map (\(_,_,t)->t) xs)
 varName (PlainTV n) = n
 varName (KindedTV n _) = n
