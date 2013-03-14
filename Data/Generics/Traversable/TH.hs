@@ -73,18 +73,9 @@ deriveGTraversable name = do
   info <- reify name
   ctx <- newName "c"
 
+  (typeName, typeParams, constructors) <- getDataInfo name
+
   let
-    decl =
-      case info of
-        TyConI d -> d
-        _ -> error ("can't be used on anything but a type constructor of an algebraic data type")
-
-    (typeName, typeParams, _) =
-      case decl of
-        DataD    _ n ps cs _ -> (n, map varName ps, map conA cs)
-        NewtypeD _ n ps c  _ -> (n, map varName ps, [conA c])
-        _ -> err ("not a data type declaration: " ++ show decl)
-
     appliedType = foldl appT (conT typeName) $ map varT typeParams
 
     -- instance (...) => GTraversable ctx MyType where { ... }
