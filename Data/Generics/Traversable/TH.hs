@@ -12,6 +12,7 @@ import Language.Haskell.TH
 import Control.Monad
 import Data.Generics.Traversable.Core
 import Control.Applicative
+import Data.List
 
 err s = error $ "Data.Generics.Traversable.TH: " ++ s
 
@@ -76,22 +77,21 @@ deriveGTraversable name = do
   (typeName, typeParams, constructors) <- getDataInfo name
 
   let
-    appliedType = foldl appT (conT typeName) $ map varT typeParams
+    appliedType = foldl AppT (ConT typeName) $ map VarT typeParams
 
     -- instance (...) => GTraversable ctx MyType where { ... }
     inst =
-      instanceD context (conT ''GTraversable `appT` varT ctx `appT` appliedType) [ do
+      instanceD context (conT ''GTraversable `appT` varT ctx `appT` pure appliedType) [ do
           -- gtraverse = ...
           funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ]
         ]
 
-    context = sequence $ gtraversableContext ++ userContext ++ selfContext
+    context = sequence $ gtraversableContext ++ userContext
 
-    selfContext = [ classP ctx $ pure appliedType ]
+    types = filter (/= appliedType) $ nub [ t | (_,_,ts) <- constructors, t <- ts ]
 
-    gtraversableContext = [ classP ''GTraversable [varT ctx, varT name ] | name <- typeParams ]
-
-    userContext = [ classP ctx [pure t] | (_,_,ts) <- constructors, t <- ts ]
+    userContext = [ classP ctx [pure t] | t <- appliedType : types ]
+    gtraversableContext = [ classP ''GTraversable [varT ctx, pure t] | t <- types ]
 
   sequence [inst]
 
