@@ -4,7 +4,7 @@ module Data.Generics.Traversable.Core where
 import GHC.Exts (Constraint)
 import Control.Applicative
 
-class GTraversable (c :: * -> Constraint) a where
+class c a => GTraversable (c :: * -> Constraint) a where
   -- | Applicative traversal over (a subset of) immediate subterms. This is
   -- a generic version of 'traverse' from "Data.Traversable".
   --

@@ -7,14 +7,14 @@ import Data.Generics.Traversable.Core
 import Data.Generics.Traversable.TH
 import Control.Applicative
 
-instance GTraversable c ()
-instance GTraversable c Bool
-instance GTraversable c Int
-instance GTraversable c Integer
-instance GTraversable c Float
-instance GTraversable c Double
-instance GTraversable c Char
-instance GTraversable c Ordering
+instance c () => GTraversable c ()
+instance c Bool => GTraversable c Bool
+instance c Int => GTraversable c Int
+instance c Integer => GTraversable c Integer
+instance c Float => GTraversable c Float
+instance c Double => GTraversable c Double
+instance c Char => GTraversable c Char
+instance c Ordering => GTraversable c Ordering
 
 deriveGTraversable ''Maybe
 deriveGTraversable ''Either
@@ -22,7 +22,7 @@ deriveGTraversable ''(,)
 deriveGTraversable ''(,,)
 
 -- Uniform instance for lists
-instance (GTraversable c a, c a) => GTraversable c [a] where
+instance (GTraversable c a, c a, c [a]) => GTraversable c [a] where
   gtraverse f = go where
     go [] = pure []
     go (x:xs) = (:) <$> f x <*> go xs
