@@ -17,7 +17,6 @@ class c a => GTraversable (c :: * -> Constraint) a where
   -- types without interesting subterms (in particular, atomic types).
   gtraverse
     :: (Applicative f, ?c :: p c)
-    => (forall d . (GTraversable c d, c d) => d -> f d)
+    => (forall d . (GTraversable c d) => d -> f d)
     -> a -> f a
   gtraverse = const pure
-

@@ -54,14 +54,14 @@ import Data.Traversable
 -- | Generic map over the immediate subterms
 gmap
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d) => d -> d)
+  => (forall d . (GTraversable c d) => d -> d)
   -> a -> a
 gmap f = runIdentity . gtraverse (Identity . f)
 
 -- | Generic monadic map over the immediate subterms
 gmapM
   :: (Monad m, GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d) => d -> m d)
+  => (forall d . (GTraversable c d) => d -> m d)
   -> a -> m a
 gmapM f = unwrapMonad . gtraverse (WrapMonad . f)
 
@@ -69,21 +69,21 @@ gmapM f = unwrapMonad . gtraverse (WrapMonad . f)
 -- "Data.Foldable")
 gfoldMap
   :: (Monoid r, GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d) => d -> r)
+  => (forall d . (GTraversable c d) => d -> r)
   -> a -> r
 gfoldMap f = getConstant . gtraverse (Constant . f)
 
 -- | Generic right fold over the immediate subterms
 gfoldr
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d) => d -> r -> r)
+  => (forall d . (GTraversable c d) => d -> r -> r)
   -> r -> a -> r
 gfoldr f z t = appEndo (gfoldMap (Endo . f) t) z
 
 -- | Generic strict left fold over the immediate subterms
 gfoldl'
   :: (GTraversable c a, ?c :: p c)
-  => (forall d . (GTraversable c d, c d) => r -> d -> r)
+  => (forall d . (GTraversable c d) => r -> d -> r)
   -> r -> a -> r
 gfoldl' f z0 xs = gfoldr f' id xs z0
   where f' x k z = k $! f z x
@@ -91,21 +91,21 @@ gfoldl' f z0 xs = gfoldr f' id xs z0
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
   :: (GTraversable c a, c a, ?c :: p c)
-  => (forall d. (GTraversable c d, c d) => d -> d)
+  => (forall d. (GTraversable c d) => d -> d)
   -> a -> a
 everywhere f = f . gmap (everywhere f)
 
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
   :: (GTraversable c a, c a, ?c :: p c)
-  => (forall d. (GTraversable c d, c d) => d -> d)
+  => (forall d. (GTraversable c d) => d -> d)
   -> a -> a
 everywhere' f = gmap (everywhere' f) . f
 
 -- | Monadic variation on everywhere
 everywhereM
   :: (Monad m, GTraversable c a, c a, ?c :: p c)
-  => (forall d. (GTraversable c d, c d) => d -> m d)
+  => (forall d. (GTraversable c d) => d -> m d)
   -> a -> m a
 everywhereM f = f <=< gmapM (everywhereM f)
 
@@ -113,7 +113,7 @@ everywhereM f = f <=< gmapM (everywhereM f)
 everything
   :: (GTraversable c a, c a, ?c :: p c)
   => (r -> r -> r)
-  -> (forall d . (GTraversable c d, c d) => d -> r)
+  -> (forall d . (GTraversable c d) => d -> r)
   -> a -> r
 everything combine f x =
   gfoldl' (\a y -> combine a (everything combine f y)) (f x) x
