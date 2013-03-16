@@ -8,7 +8,7 @@
 -- that provides additional facilities to work with the data. Most
 -- functions take an implicit parameter @?c :: p c@; it's
 -- used to disambugate which context you are referring to. @p@ can be
--- 'Proxy' from the @tagged@ package or any other suitable type
+-- @Proxy@ from the @tagged@ package or any other suitable type
 -- constructor.
 --
 -- For more information, see:
