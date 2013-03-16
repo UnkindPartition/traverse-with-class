@@ -86,12 +86,11 @@ deriveGTraversable name = do
           funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ]
         ]
 
-    context = sequence $ gtraversableContext ++ userContext
+    context = sequence userContext
 
-    types = filter (/= appliedType) $ nub [ t | (_,_,ts) <- constructors, t <- ts ]
+    types = nub [ t | (_,_,ts) <- constructors, t <- ts ]
 
-    userContext = [ classP ctx [pure t] | t <- appliedType : types ]
-    gtraversableContext = [ classP ''GTraversable [varT ctx, pure t] | t <- types ]
+    userContext = [ classP ctx [pure t] | t <- types ]
 
   sequence [inst]
 
