@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams #-}
+{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams, ScopedTypeVariables #-}
 -- | All of the functions below work only on «interesting» subterms.
 -- It is up to the instance writer to decide which subterms are
 -- interesting and which subterms should count as immediate. This can
@@ -97,31 +97,57 @@ gfoldl'
 gfoldl' f z0 xs = gfoldr f' id xs z0
   where f' x k z = k $! f z x
 
+data Proxy (c :: * -> Constraint) = Proxy
+
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
-  :: (Rec c a, ?c :: p (Rec c))
+  :: forall a c p .
+     (Rec c a, ?c :: p c)
   => (forall d. (Rec c d) => d -> d)
   -> a -> a
-everywhere f = f . gmap (everywhere f)
+everywhere f =
+  let ?c = Proxy :: Proxy (Rec c) in
+  let
+    go :: forall a . Rec c a => a -> a
+    go = f . gmap go
+  in go
+
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
-  :: (Rec c a, ?c :: p (Rec c))
+  :: forall a c p .
+     (Rec c a, ?c :: p c)
   => (forall d. (Rec c d) => d -> d)
   -> a -> a
-everywhere' f = gmap (everywhere' f) . f
+everywhere' f =
+  let ?c = Proxy :: Proxy (Rec c) in
+  let
+    go :: forall a . Rec c a => a -> a
+    go = gmap go . f
+  in go
 
 -- | Monadic variation on everywhere
 everywhereM
-  :: (Monad m, Rec c a, ?c :: p (Rec c))
+  :: forall m a c p .
+     (Monad m, Rec c a, ?c :: p c)
   => (forall d. (Rec c d) => d -> m d)
   -> a -> m a
-everywhereM f = f <=< gmapM (everywhereM f)
+everywhereM f =
+  let ?c = Proxy :: Proxy (Rec c) in
+  let
+    go :: forall a . Rec c a => a -> m a
+    go = f <=< gmapM go
+  in go
 
 -- | Strict left fold over all elements, top-down
 everything
-  :: (Rec c a, ?c :: p (Rec c))
+  :: forall r a c p .
+     (Rec c a, ?c :: p c)
   => (r -> r -> r)
   -> (forall d . (Rec c d) => d -> r)
   -> a -> r
-everything combine f x =
-  gfoldl' (\a y -> combine a (everything combine f y)) (f x) x
+everything combine f =
+  let ?c = Proxy :: Proxy (Rec c) in
+  let
+    go :: forall a . Rec c a => a -> r
+    go x = gfoldl' (\a y -> combine a (go y)) (f x) x
+  in go
