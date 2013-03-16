@@ -54,9 +54,10 @@ import Data.Generics.Traversable.Instances ()
 import Data.Foldable
 import Data.Traversable
 
--- | @Rec c a@ is (automatically) satisfied whenever `a` is an instance of
--- both `c` and `GTraversable`. This is needed to express \"deep
--- traversals\".
+-- | 'Rec' enables \"deep traversals\".
+--
+-- It is satisfied automatically when its superclass constraints are
+-- satisfied — you are not supposed to declare new instances of this class.
 class    (GTraversable (Rec c) a, c a) => Rec (c :: * -> Constraint) a
 instance (GTraversable (Rec c) a, c a) => Rec (c :: * -> Constraint) a
 
