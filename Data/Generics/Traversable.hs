@@ -99,29 +99,29 @@ gfoldl' f z0 xs = gfoldr f' id xs z0
 
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
-  :: (GTraversable (Rec c) a, c a, ?c :: p (Rec c))
-  => (forall d. (c d) => d -> d)
+  :: (Rec c a, ?c :: p (Rec c))
+  => (forall d. (Rec c d) => d -> d)
   -> a -> a
 everywhere f = f . gmap (everywhere f)
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
-  :: (GTraversable (Rec c) a, c a, ?c :: p (Rec c))
-  => (forall d. (c d) => d -> d)
+  :: (Rec c a, ?c :: p (Rec c))
+  => (forall d. (Rec c d) => d -> d)
   -> a -> a
 everywhere' f = gmap (everywhere' f) . f
 
 -- | Monadic variation on everywhere
 everywhereM
-  :: (Monad m, GTraversable (Rec c) a, c a, ?c :: p (Rec c))
-  => (forall d. (c d) => d -> m d)
+  :: (Monad m, Rec c a, ?c :: p (Rec c))
+  => (forall d. (Rec c d) => d -> m d)
   -> a -> m a
 everywhereM f = f <=< gmapM (everywhereM f)
 
 -- | Strict left fold over all elements, top-down
 everything
-  :: (GTraversable (Rec c) a, c a, ?c :: p (Rec c))
+  :: (Rec c a, ?c :: p (Rec c))
   => (r -> r -> r)
-  -> (forall d . (c d) => d -> r)
+  -> (forall d . (Rec c d) => d -> r)
   -> a -> r
 everything combine f x =
   gfoldl' (\a y -> combine a (everything combine f y)) (f x) x
