@@ -19,4 +19,4 @@ class GTraversable (c :: * -> Constraint) a where
     :: (Applicative f, ?c :: p c)
     => (forall d . c d => d -> f d)
     -> a -> f a
-  gtraverse = const pure
+  gtraverse _ x = pure x
