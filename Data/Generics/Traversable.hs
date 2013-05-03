@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams, ScopedTypeVariables #-}
+{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams, ScopedTypeVariables, FlexibleContexts, FlexibleInstances #-}
 -- | All of the functions below work only on «interesting» subterms.
 -- It is up to the instance writer to decide which subterms are
 -- interesting and which subterms should count as immediate. This can
