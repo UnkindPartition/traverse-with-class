@@ -31,3 +31,4 @@ library
                        Data.Generics.Traversable.Instances
   build-depends:       base == 4.*, transformers, template-haskell
   default-language:    Haskell2010
+  other-extensions:    TemplateHaskell
