@@ -10,5 +10,7 @@ Maintainers
 
 [Roman Cheplyaka](https://github.com/feuerbach) is the primary maintainer.
 
-[Adam Bergmark](https://github.com/bergmark) is the backup maintainer. Please
-get in touch with him if the primary maintainer cannot be reached.
+[Sjoerd Visscher](https://github.com/sjoerdvisscher) and
+[Adam Bergmark](https://github.com/bergmark)
+are the backup maintainers. Please get in touch with them if the primary
+maintainer cannot be reached.
