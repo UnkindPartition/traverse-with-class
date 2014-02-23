@@ -26,6 +26,7 @@ extra-source-files:
 library
   exposed-modules:     Data.Generics.Traversable
                        Data.Generics.Traversable.TH
+                       Data.Generics.Traversable.Zipper
   other-modules:
                        Data.Generics.Traversable.Core
                        Data.Generics.Traversable.Instances
