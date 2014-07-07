@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP, TemplateHaskell #-}
 -- | For the generated instances you'll typically need the following
 -- extensions:
 --
@@ -90,7 +90,12 @@ deriveGTraversable name = do
 
     types = nub [ t | (_,_,ts) <- constructors, t <- ts ]
 
+#if MIN_VERSION_template_haskell(2,10,0)
+-- see https://ghc.haskell.org/trac/ghc/ticket/9270
+    userContext = [ varT ctx `appT` pure t | t <- types ]
+#else
     userContext = [ classP ctx [pure t] | t <- types ]
+#endif
 
   sequence [inst]
 
