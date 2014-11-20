@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2
+-----------
+
+Implement a zipper
+
 Version 0.1.1.1
 ---------------
 
