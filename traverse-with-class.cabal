@@ -30,6 +30,7 @@ library
   other-modules:
                        Data.Generics.Traversable.Core
                        Data.Generics.Traversable.Instances
-  build-depends:       base == 4.*, transformers, template-haskell, tagged
+                       Data.Proxy.Fork
+  build-depends:       base == 4.*, transformers, template-haskell
   default-language:    Haskell2010
   other-extensions:    TemplateHaskell

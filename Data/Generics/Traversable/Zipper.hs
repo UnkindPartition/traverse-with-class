@@ -93,8 +93,8 @@ module Data.Generics.Traversable.Zipper (
 import Control.Monad ((<=<), MonadPlus, mzero, mplus, liftM)
 import Data.Maybe (fromJust)
 import Data.Generics.Traversable
-import Data.Typeable
-import Data.Proxy
+import Data.Typeable (Typeable, cast)
+import Data.Proxy.Fork
 import GHC.Exts (Constraint)
 import Control.Applicative
 
