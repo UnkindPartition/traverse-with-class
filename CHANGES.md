@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.0.2
+---------------
+
+Return a few instances that accidentally got lost
+
 Version 0.2.0.1
 ---------------
 
