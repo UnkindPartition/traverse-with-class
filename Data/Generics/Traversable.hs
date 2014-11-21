@@ -46,6 +46,7 @@ import Control.Monad
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
+import Data.Proxy
 
 import Data.Generics.Traversable.Core
 import Data.Generics.Traversable.Instances ()
@@ -97,8 +98,6 @@ gfoldl'
   -> r -> a -> r
 gfoldl' f z0 xs = gfoldr f' id xs z0
   where f' x k z = k $! f z x
-
-data Proxy (c :: * -> Constraint) = Proxy
 
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
