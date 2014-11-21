@@ -3,7 +3,7 @@
 -- workshop on Generic programming, 2010»
 -- (<http://www.cs.indiana.edu/~adamsmd/papers/scrap_your_zippers/>).
 --
--- Unlike the original @syz@ package, this implementation (based on
+-- Compared to the original @syz@ package, this implementation (based on
 -- 'GTraversable') gives more flexibility as to where a zipper may point
 -- to and what is considered as siblings.
 --
