@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.0.1
+---------------
+
+Fix compatibility with older ghcs
+
 Version 0.2
 -----------
 
