@@ -1,7 +1,7 @@
 -- | Based on «Scrap Your Zippers: A Generic Zipper for Heterogeneous Types.
 -- Michael D. Adams.  WGP '10: Proceedings of the 2010 ACM SIGPLAN
 -- workshop on Generic programming, 2010»
--- (<http://www.cs.indiana.edu/~adamsmd/papers/scrap_your_zippers/>).
+-- (<http://michaeldadams.org/papers/scrap_your_zippers/>).
 --
 -- Compared to the original @syz@ package, this implementation (based on
 -- 'GTraversable') gives more flexibility as to where a zipper may point
