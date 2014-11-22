@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.0.3
+---------------
+
+Update the link to the syz paper
+
 Version 0.2.0.2
 ---------------
 
