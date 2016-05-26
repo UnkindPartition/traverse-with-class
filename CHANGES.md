@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.0.4
+---------------
+
+Update to build with ghc 8
+
 Version 0.2.0.3
 ---------------
 
