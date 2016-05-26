@@ -1,4 +1,9 @@
-{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams, ScopedTypeVariables, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams, ScopedTypeVariables, FlexibleContexts, FlexibleInstances, CPP #-}
+
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE UndecidableSuperClasses #-}
+#endif
+
 -- | All of the functions below work only on «interesting» subterms.
 -- It is up to the instance writer to decide which subterms are
 -- interesting and which subterms should count as immediate. This can
