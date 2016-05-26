@@ -26,8 +26,13 @@ getDataInfo name = do
 
   return $
     case decl of
-      DataD    _ n ps cs _ -> (n, map varName ps, map conA cs)
-      NewtypeD _ n ps c  _ -> (n, map varName ps, [conA c])
+#if MIN_VERSION_template_haskell(2,11,0)
+      DataD    _ n ps _ cs _ -> (n, map varName ps, map conA cs)
+      NewtypeD _ n ps _ c  _ -> (n, map varName ps, [conA c])
+#else
+      DataD    _ n ps   cs _ -> (n, map varName ps, map conA cs)
+      NewtypeD _ n ps   c  _ -> (n, map varName ps, [conA c])
+#endif
       _ -> err ("not a data type declaration: " ++ show decl)
 
 -- | Return a lambda expression which implements 'gtraverse' for the given
