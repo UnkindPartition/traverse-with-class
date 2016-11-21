@@ -143,7 +143,6 @@ everywhereM f =
     go = f <=< gmapM go
   in go
 
--- | Strict left fold over all elements, top-down
 everything
   :: forall r a c p .
      (Rec c a, ?c :: p c)
@@ -156,3 +155,48 @@ everything combine f =
     go :: forall a . Rec c a => a -> r
     go x = gfoldl' (\a y -> combine a (go y)) (f x) x
   in go
+
+{- ^ Strict left fold over all elements, top-down
+
+==== example use: test case
+@
+import Test.Hspec
+import "Data.Generics.Traversable"
+import "Language.Haskell.Exts.Syntax"
+import "Data.Proxy"
+
+
+main::IO()
+main = hspec $ do
+       describe \"Test.TestTraverseWithClass\" $ do
+          it "case 1" $ do
+            let ?c = Proxy::Proxy Update
+            'everywhere'' upd qn1 `shouldBe` qn2
+        where qn1 = Qual 1 (ModuleName 1 \"Mod\") (Ident 1 \"fn\")::QName Int
+              qn2 = Qual 1 (ModuleName 1 \"NewMod\") (Ident 1 \"newFn\")::QName Int
+
+
+instance 'GTraversable' ('Rec' Update) (QName l)
+
+instance 'GTraversable' Update (QName l) where
+    'gtraverse' fn0 a0 = fn0 a0
+
+
+class Update a where
+    upd::a -> a
+
+instance Update (ModuleName l) where
+    upd (ModuleName l0 mod0) = ModuleName l0 \"NewMod\"
+
+instance Update (Name l) where
+    upd (Ident l0 name0) = Ident l0 "newFn"
+    upd other0 = other0
+
+instance Update (QName l) where
+    upd (Qual l0 mod0 name0) = Qual l0 mod1 name1
+            where mod1 = upd mod0
+                  name1 = upd name0
+    upd (UnQual l0 name0) = UnQual l0 name1
+            where name1 = upd name0
+    upd other0 = other0
+@   -}
