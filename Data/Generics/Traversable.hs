@@ -169,34 +169,37 @@ import "Data.Proxy"
 main::IO()
 main = hspec $ do
        describe \"Test.TestTraverseWithClass\" $ do
-          it "case 1" $ do
-            let ?c = Proxy::Proxy Update
-            'everywhere'' upd qn1 `shouldBe` qn2
+          it \"case 1\" $ do
+              let ?c = Proxy::Proxy Process
+              let Just qn2 = 'everywhereM' upd qn1
+              qn2 `shouldBe` qn2
         where qn1 = Qual 1 (ModuleName 1 \"Mod\") (Ident 1 \"fn\")::QName Int
               qn2 = Qual 1 (ModuleName 1 \"NewMod\") (Ident 1 \"newFn\")::QName Int
 
 
-instance 'GTraversable' ('Rec' Update) (QName l)
+instance 'GTraversable' ('Rec' 'Process') (QName l)
+instance 'GTraversable' 'Process' (QName l) where
+    'gtraverse' fn0 (Qual l0 mod0 name0) =
+        Qual l0 \<$\> fn0 mod0 \<*\> fn0 name0
 
-instance 'GTraversable' Update (QName l) where
-    'gtraverse' fn0 a0 = fn0 a0
+instance 'Process' (QName l) where upd = items
 
 
-class Update a where
-    upd::a -> a
 
-instance Update (ModuleName l) where
-    upd (ModuleName l0 mod0) = ModuleName l0 \"NewMod\"
+class Process a where
+    upd::Monad m => a -> m a
 
-instance Update (Name l) where
-    upd (Ident l0 name0) = Ident l0 "newFn"
-    upd other0 = other0
 
-instance Update (QName l) where
-    upd (Qual l0 mod0 name0) = Qual l0 mod1 name1
-            where mod1 = upd mod0
-                  name1 = upd name0
-    upd (UnQual l0 name0) = UnQual l0 name1
-            where name1 = upd name0
-    upd other0 = other0
+items::(Monad m, Process a, GTraversable Process a) =>
+    a -> m a
+items = 'gmapM' upd
+    where ?c = Proxy::Proxy Process
+
+
+instance 'Process' (ModuleName l) where
+    upd (ModuleName l0 mod0) = pure $ ModuleName l0 \"NewMod\"
+
+instance 'Process' (Name l) where
+    upd (Ident l0 name0) = pure $ Ident l0 "newFn"
+    upd other0 = pure other0
 @   -}
