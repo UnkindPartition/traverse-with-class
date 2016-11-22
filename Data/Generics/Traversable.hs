@@ -171,10 +171,10 @@ main = hspec $ do
        describe \"Test.TestTraverseWithClass\" $ do
           it \"case 1\" $ do
               let ?c = Proxy::Proxy Process
-              let Just qn2 = 'everywhereM' upd qn1
-              qn2 `shouldBe` qn2
-        where qn1 = Qual 1 (ModuleName 1 \"Mod\") (Ident 1 \"fn\")::QName Int
-              qn2 = Qual 1 (ModuleName 1 \"NewMod\") (Ident 1 \"newFn\")::QName Int
+              let Just actual2 = 'everywhereM' upd original1
+              actual2 `shouldBe` expect3
+        where original1 = Qual 1 (ModuleName 1 \"Mod\") (Ident 1 "fn")::QName Int
+              expect3 = Qual 1 (ModuleName 1 \"NewMod\") (Ident 1 "newFn")::QName Int
 
 
 instance 'GTraversable' ('Rec' 'Process') (QName l)
