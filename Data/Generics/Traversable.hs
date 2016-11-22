@@ -143,7 +143,6 @@ everywhereM f =
     go = f <=< gmapM go
   in go
 
--- | Strict left fold over all elements, top-down
 everything
   :: forall r a c p .
      (Rec c a, ?c :: p c)
@@ -156,3 +155,51 @@ everything combine f =
     go :: forall a . Rec c a => a -> r
     go x = gfoldl' (\a y -> combine a (go y)) (f x) x
   in go
+
+{- ^ Strict left fold over all elements, top-down
+
+==== example use: test case
+@
+import Test.Hspec
+import "Data.Generics.Traversable"
+import "Language.Haskell.Exts.Syntax"
+import "Data.Proxy"
+
+
+main::IO()
+main = hspec $ do
+       describe \"Test.TestTraverseWithClass\" $ do
+          it \"case 1\" $ do
+              let ?c = Proxy::Proxy Process
+              let Just actual2 = 'everywhereM' upd original1
+              actual2 `shouldBe` expect3
+        where original1 = Qual 1 (ModuleName 1 \"Mod\") (Ident 1 "fn")::QName Int
+              expect3 = Qual 1 (ModuleName 1 \"NewMod\") (Ident 1 "newFn")::QName Int
+
+
+instance 'GTraversable' ('Rec' 'Process') (QName l)
+instance 'GTraversable' 'Process' (QName l) where
+    'gtraverse' fn0 (Qual l0 mod0 name0) =
+        Qual l0 \<$\> fn0 mod0 \<*\> fn0 name0
+
+instance 'Process' (QName l) where upd = items
+
+
+
+class Process a where
+    upd::Monad m => a -> m a
+
+
+items::(Monad m, Process a, GTraversable Process a) =>
+    a -> m a
+items = 'gmapM' upd
+    where ?c = Proxy::Proxy Process
+
+
+instance 'Process' (ModuleName l) where
+    upd (ModuleName l0 mod0) = pure $ ModuleName l0 \"NewMod\"
+
+instance 'Process' (Name l) where
+    upd (Ident l0 name0) = pure $ Ident l0 "newFn"
+    upd other0 = pure other0
+@   -}
