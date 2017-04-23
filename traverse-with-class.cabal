@@ -22,6 +22,10 @@ extra-source-files:
   README.md
   CHANGES.md
 
+source-repository head
+  type:     git
+  location: https://github.com/feuerbach/traverse-with-class.git
+
 library
   exposed-modules:     Data.Generics.Traversable
                        Data.Generics.Traversable.TH
