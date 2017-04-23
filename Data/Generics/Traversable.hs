@@ -4,19 +4,23 @@
 -- also depend on the context @c@.
 --
 -- The context, denoted @c@, is a constraint (of kind @* -> Constraint@)
--- that provides additional facilities to work with the data. Most
--- functions take an implicit parameter @?c :: p c@; it's
--- used to disambugate which context you are referring to. @p@ can be
--- @Proxy@ from the @tagged@ package or any other suitable type
--- constructor.
+-- that provides additional facilities to work with the data.
+-- In most cases, the context cannot be inferred automatically.
+-- You need to provide it using the
+-- <https://downloads.haskell.org/~ghc/8.0.2/docs/html/users_guide/glasgow_exts.html#visible-type-application type application syntax>:
+--
+-- > gmap @Show f x
+-- > everywhere @Typeable f x
+--
+-- etc.
 --
 -- For more information, see:
 --
 -- [Scrap your boilerplate with class]
--- <http://research.microsoft.com/en-us/um/people/simonpj/papers/hmap/>
+-- <https://www.microsoft.com/en-us/research/publication/scrap-your-boilerplate-with-class/>
 --
 -- [Generalizing generic fold]
--- <http://ro-che.info/articles/2013-03-11-generalizing-gfoldl.html>
+-- <http://ro-che.info/articles/2013-03-11-generalizing-gfoldl>
 
 module Data.Generics.Traversable
   (
