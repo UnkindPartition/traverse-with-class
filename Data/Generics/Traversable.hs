@@ -45,7 +45,7 @@ import Control.Monad
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
-import Data.Proxy.Fork
+import Data.Proxy
 
 import Data.Generics.Traversable.Core
 import Data.Generics.Traversable.Instances ()

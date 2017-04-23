@@ -29,7 +29,6 @@ library
   other-modules:
                        Data.Generics.Traversable.Core
                        Data.Generics.Traversable.Instances
-                       Data.Proxy.Fork
   build-depends:       base >= 4.9 && < 5,
                        transformers,
                        template-haskell

@@ -92,7 +92,7 @@ import Control.Monad ((<=<), MonadPlus, mzero, mplus, liftM)
 import Data.Maybe (fromJust)
 import Data.Generics.Traversable
 import Data.Typeable (Typeable, cast)
-import Data.Proxy.Fork
+import Data.Proxy
 import GHC.Exts (Constraint)
 import Control.Applicative
 
