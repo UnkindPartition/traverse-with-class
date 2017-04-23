@@ -143,9 +143,7 @@ unit :: Rec c b => b -> Left c b
 unit = LeftCons (LeftUnit id)
 
 toLeft :: forall a c . (Rec c a) => a -> Left c a
-toLeft =
-  let ?c = Proxy :: Proxy (Rec c) in
-    gtraverse unit
+toLeft = gtraverse @(Rec c) unit
 
 fromLeft :: Left c r -> r
 fromLeft (LeftUnit a)   = a

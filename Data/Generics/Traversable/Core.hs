@@ -16,7 +16,7 @@ class GTraversable (c :: * -> Constraint) a where
   -- 'gtraverse' has a default implementation @const pure@, which works for
   -- types without interesting subterms (in particular, atomic types).
   gtraverse
-    :: (Applicative f, ?c :: p c)
+    :: (Applicative f)
     => (forall d . c d => d -> f d)
     -> a -> f a
   gtraverse _ x = pure x
