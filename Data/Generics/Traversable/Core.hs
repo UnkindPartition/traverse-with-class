@@ -1,4 +1,3 @@
-{-# LANGUAGE ConstraintKinds, KindSignatures, MultiParamTypeClasses, RankNTypes, UndecidableInstances, ImplicitParams #-}
 module Data.Generics.Traversable.Core where
 
 import GHC.Exts (Constraint)

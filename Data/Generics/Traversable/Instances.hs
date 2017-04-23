@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, MultiParamTypeClasses, FlexibleInstances, ConstraintKinds, UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
 -- | This module defines 'GTraversable' instances for standard types
 -- exported by "Prelude"
 module Data.Generics.Traversable.Instances () where

@@ -60,9 +60,7 @@
 -- Just 'd'
 --
 -- So, unlike in @syz@, all of the list elements are siblings.
-{-# LANGUAGE Rank2Types, GADTs, KindSignatures, ImplicitParams,
-             ScopedTypeVariables, ConstraintKinds,
-             MultiParamTypeClasses, UndecidableInstances #-}
+{-# LANGUAGE GADTs #-}
 
 module Data.Generics.Traversable.Zipper (
   -- * Core types
