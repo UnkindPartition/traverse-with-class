@@ -22,7 +22,7 @@ getDataInfo name = do
     decl =
       case info of
         TyConI d -> d
-        _ -> error ("can't be used on anything but a type constructor of an algebraic data type")
+        _ -> err "can't be used on anything but a type constructor of an algebraic data type"
 
   return $
     case decl of
