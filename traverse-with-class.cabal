@@ -45,3 +45,4 @@ library
                        AllowAmbiguousTypes
                        UndecidableSuperClasses
   other-extensions:    TemplateHaskell
+  ghc-options:         -Wall

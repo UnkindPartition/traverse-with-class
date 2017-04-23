@@ -45,14 +45,9 @@ import Control.Monad
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
-import Data.Proxy
 
 import Data.Generics.Traversable.Core
 import Data.Generics.Traversable.Instances ()
-
--- for documentation only
-import Data.Foldable
-import Data.Traversable
 
 -- | 'Rec' enables \"deep traversals\".
 --
@@ -75,8 +70,7 @@ gmapM
   -> a -> m a
 gmapM f = unwrapMonad . gtraverse @c (WrapMonad . f)
 
--- | Generic monoidal fold over the immediate subterms (cf. 'foldMap' from
--- "Data.Foldable")
+-- | Generic monoidal fold over the immediate subterms (cf. 'Data.Foldable.foldMap')
 gfoldMap
   :: forall c r a . (Monoid r, GTraversable c a)
   => (forall d . (c d) => d -> r)
@@ -100,49 +94,49 @@ gfoldl' f z0 xs = gfoldr @c f' id xs z0
 
 -- | Apply a transformation everywhere in bottom-up manner
 everywhere
-  :: forall c a p .
+  :: forall c a .
      (Rec c a)
   => (forall d. (Rec c d) => d -> d)
   -> a -> a
 everywhere f =
   let
-    go :: forall a . Rec c a => a -> a
+    go :: forall b . Rec c b => b -> b
     go = f . gmap @(Rec c) go
   in go
 
 -- | Apply a transformation everywhere in top-down manner
 everywhere'
-  :: forall c a p .
+  :: forall c a .
      (Rec c a)
   => (forall d. (Rec c d) => d -> d)
   -> a -> a
 everywhere' f =
   let
-    go :: forall a . Rec c a => a -> a
+    go :: forall b . Rec c b => b -> b
     go = gmap @(Rec c) go . f
   in go
 
 -- | Monadic variation on everywhere
 everywhereM
-  :: forall c m a p .
+  :: forall c m a .
      (Monad m, Rec c a)
   => (forall d. (Rec c d) => d -> m d)
   -> a -> m a
 everywhereM f =
   let
-    go :: forall a . Rec c a => a -> m a
+    go :: forall b . Rec c b => b -> m b
     go = f <=< gmapM @(Rec c) go
   in go
 
 -- | Strict left fold over all elements, top-down
 everything
-  :: forall c r a p .
+  :: forall c r a .
      (Rec c a)
   => (r -> r -> r)
   -> (forall d . (Rec c d) => d -> r)
   -> a -> r
 everything combine f =
   let
-    go :: forall a . Rec c a => a -> r
+    go :: forall b . Rec c b => b -> r
     go x = gfoldl' @(Rec c) (\a y -> combine a (go y)) (f x) x
   in go

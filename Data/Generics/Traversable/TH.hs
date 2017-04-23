@@ -11,11 +11,12 @@ module Data.Generics.Traversable.TH
 import Language.Haskell.TH
 import Control.Monad
 import Data.Generics.Traversable.Core
-import Control.Applicative
 import Data.List
 
+err :: String -> a
 err s = error $ "Data.Generics.Traversable.TH: " ++ s
 
+getDataInfo :: Name -> Q (Name, [Name], [(Name, Int, [Type])])
 getDataInfo name = do
   info <- reify name
   let
@@ -39,7 +40,7 @@ getDataInfo name = do
 -- data type.
 gtraverseExpr :: Name -> Q Exp
 gtraverseExpr typeName = do
-  (typeName, typeParams, constructors) <- getDataInfo typeName
+  (_name, _params, constructors) <- getDataInfo typeName
   f <- newName "f"
   x <- newName "x"
 
@@ -76,7 +77,6 @@ gtraverseExpr typeName = do
 -- >  gtraverse = $(gtraverseExpr ''MyType)
 deriveGTraversable :: Name -> Q [Dec]
 deriveGTraversable name = do
-  info <- reify name
   ctx <- newName "c"
 
   (typeName, typeParams, constructors) <- getDataInfo name
@@ -104,9 +104,13 @@ deriveGTraversable name = do
 
   sequence [inst]
 
+conA :: Con -> (Name, Int, [Type])
 conA (NormalC c xs)   = (c, length xs, map snd xs)
 conA (InfixC x1 c x2) = conA (NormalC c [x1, x2])
 conA (ForallC _ _ c)  = conA c
 conA (RecC c xs)      = (c, length xs, map (\(_,_,t)->t) xs)
+conA _ = err "GADTs are not supported yet"
+
+varName :: TyVarBndr -> Name
 varName (PlainTV n) = n
 varName (KindedTV n _) = n

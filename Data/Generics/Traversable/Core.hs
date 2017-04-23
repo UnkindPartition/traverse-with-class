@@ -1,16 +1,15 @@
 module Data.Generics.Traversable.Core where
 
 import GHC.Exts (Constraint)
-import Control.Applicative
 
 class GTraversable (c :: * -> Constraint) a where
   -- | Applicative traversal over (a subset of) immediate subterms. This is
-  -- a generic version of 'traverse' from "Data.Traversable".
+  -- a generic version of 'Data.Traversable.traverse'.
   --
   -- The supplied function is applied only to the «interesting» subterms.
   --
   -- Other subterms are lifted using 'pure', and the whole structure is
-  -- folded back using '<*>'.
+  -- folded back using 'Control.Applicative.<*>'.
   --
   -- 'gtraverse' has a default implementation @const pure@, which works for
   -- types without interesting subterms (in particular, atomic types).

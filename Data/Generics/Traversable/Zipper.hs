@@ -88,13 +88,10 @@ module Data.Generics.Traversable.Zipper (
   setHole'
   ) where
 
-import Control.Monad ((<=<), MonadPlus, mzero, mplus, liftM)
-import Data.Maybe (fromJust)
+import Control.Monad (liftM)
 import Data.Generics.Traversable
 import Data.Typeable (Typeable, cast)
-import Data.Proxy
 import GHC.Exts (Constraint)
-import Control.Applicative
 
 -- Core types
 
@@ -208,20 +205,20 @@ up (Zipper hole (CtxtCons l r ctxt)) =
 
 -- | Apply a generic query to the hole.
 query
-  :: (forall a . Rec c a => a -> b)
+  :: (forall d . Rec c d => d -> b)
   -> Zipper c a -> b
 query f (Zipper hole _ctxt) = f hole
 
 -- | Apply a generic transformation to the hole.
 trans
-  :: (forall a . Rec c a => a -> a)
+  :: (forall d . Rec c d => d -> d)
   -> Zipper c a -> Zipper c a
 trans f (Zipper hole ctxt) = Zipper (f hole) ctxt
 
 -- | Apply a generic monadic transformation to the hole
 transM
   :: Monad m
-  => (forall a . Rec c a => a -> m a)
+  => (forall d . Rec c d => d -> m d)
   -> Zipper c a -> m (Zipper c a)
 transM f (Zipper hole ctxt) = do
   hole' <- f hole
