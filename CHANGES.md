@@ -1,6 +1,13 @@
 Changes
 =======
 
+Version 1.0.0.0
+---------------
+
+Replace implicit parameters with explicit type application.
+
+This drops support for GHCs older than 8.0.
+
 Version 0.2.0.4
 ---------------
 
