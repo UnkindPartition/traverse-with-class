@@ -5,6 +5,7 @@
 -- >{-# LANGUAGE TemplateHaskell, MultiParamTypeClasses, FlexibleInstances, ConstraintKinds, UndecidableInstances #-}
 module Data.Generics.Traversable.TH
   ( deriveGTraversable
+  , makeGTraversable
   , gtraverseExpr
   ) where
 
@@ -81,8 +82,8 @@ makeGtraverseExpr (_name, _params, constructors) = do
 deriveGTraversable :: Name -> Q [Dec]
 deriveGTraversable name = deriveGTraversableByInfo =<< reifyDataInfo name
 
-instGTraversable :: Dec -> Q [Dec]
-instGTraversable dec = deriveGTraversableByInfo $ getDataInfo dec
+makeGTraversable :: Dec -> Q [Dec]
+makeGTraversable dec = deriveGTraversableByInfo $ getDataInfo dec
 
 deriveGTraversableByInfo :: (Name, [Name], [(Name, Int, [Type])]) -> Q [Dec]
 deriveGTraversableByInfo (typeName, typeParams, constructors) = do
