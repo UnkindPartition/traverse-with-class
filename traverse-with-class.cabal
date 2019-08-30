@@ -28,6 +28,7 @@ source-repository head
 
 library
   exposed-modules:     Data.Generics.Traversable
+                       Data.Generics.Traversable.Generic
                        Data.Generics.Traversable.TH
                        Data.Generics.Traversable.Zipper
   other-modules:
