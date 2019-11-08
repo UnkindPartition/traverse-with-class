@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0.1.0
+---------------
+
+Add `Data.Generics.Traversable.Generic`
+
 Version 1.0.0.0
 ---------------
 
