@@ -1,4 +1,4 @@
--- | For a datatype where *every* subterm is interesting, it is
+-- | For a datatype where /every/ subterm is interesting, it is
 -- possible to leverage 'Generic' to automatically produce the
 -- 'GTraversable' instance.
 --
@@ -29,7 +29,7 @@
 -- >isAnyConfigKeySet :: MyConfig -> Bool
 -- >isAnyConfigKeySet = gfoldr @SettableConfigKey ((||) . isSet)
 --
--- For 'Generic' types which have 'Rec1' in their representation, this
+-- For 'Generic' types that have 'Rec1' in their representation, this
 -- module will not work for GHC versions below 8.6.1, as the instance
 -- makes use of @QuantifiedConstraints@. Instead, the instance for
 -- 'Rec1' will cause a type error.
