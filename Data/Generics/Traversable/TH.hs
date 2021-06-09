@@ -111,6 +111,12 @@ conA (ForallC _ _ c)  = conA c
 conA (RecC c xs)      = (c, length xs, map (\(_,_,t)->t) xs)
 conA _ = err "GADTs are not supported yet"
 
+#if MIN_VERSION_template_haskell(2,17,0)
+varName :: TyVarBndr flag -> Name
+varName (PlainTV n _) = n
+varName (KindedTV n _ _) = n
+#else
 varName :: TyVarBndr -> Name
 varName (PlainTV n) = n
 varName (KindedTV n _) = n
+#endif
