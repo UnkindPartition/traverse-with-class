@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.0.1.1
+---------------
+
+Update to build with GHC 9
+
 Version 1.0.1.0
 ---------------
 
