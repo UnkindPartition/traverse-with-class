@@ -5,6 +5,7 @@
 -- >{-# LANGUAGE TemplateHaskell, MultiParamTypeClasses, FlexibleInstances, ConstraintKinds, UndecidableInstances #-}
 module Data.Generics.Traversable.TH
   ( deriveGTraversable
+  , makeGTraversable
   , gtraverseExpr
   ) where
 
@@ -16,8 +17,8 @@ import Data.List
 err :: String -> a
 err s = error $ "Data.Generics.Traversable.TH: " ++ s
 
-getDataInfo :: Name -> Q (Name, [Name], [(Name, Int, [Type])])
-getDataInfo name = do
+reifyDataInfo :: Name -> Q (Name, [Name], [(Name, Int, [Type])])
+reifyDataInfo name = do
   info <- reify name
   let
     decl =
@@ -25,8 +26,10 @@ getDataInfo name = do
         TyConI d -> d
         _ -> err "can't be used on anything but a type constructor of an algebraic data type"
 
-  return $
-    case decl of
+  return $ getDataInfo decl
+
+getDataInfo :: Dec -> (Name, [Name], [(Name, Int, [Type])])
+getDataInfo decl = case decl of
 #if MIN_VERSION_template_haskell(2,11,0)
       DataD    _ n ps _ cs _ -> (n, map varName ps, map conA cs)
       NewtypeD _ n ps _ c  _ -> (n, map varName ps, [conA c])
@@ -39,8 +42,10 @@ getDataInfo name = do
 -- | Return a lambda expression which implements 'gtraverse' for the given
 -- data type.
 gtraverseExpr :: Name -> Q Exp
-gtraverseExpr typeName = do
-  (_name, _params, constructors) <- getDataInfo typeName
+gtraverseExpr typeName = makeGtraverseExpr =<< reifyDataInfo typeName
+
+makeGtraverseExpr :: (Name, [Name], [(Name, Int, [Type])]) -> Q Exp
+makeGtraverseExpr (_name, _params, constructors) = do
   f <- newName "f"
   x <- newName "x"
 
@@ -57,7 +62,6 @@ gtraverseExpr typeName = do
             body = foldl applyF [| $(varE 'pure) $(conE c) |] args
           match (conP c $ map varP args) (normalB body) []
     matches = map mkMatch constructors
-
   lam
 
 -- | Example usage:
@@ -76,20 +80,27 @@ gtraverseExpr typeName = do
 -- >instance GTraversable (MyType a) where
 -- >  gtraverse = $(gtraverseExpr ''MyType)
 deriveGTraversable :: Name -> Q [Dec]
-deriveGTraversable name = do
-  ctx <- newName "c"
+deriveGTraversable name = deriveGTraversableByInfo =<< reifyDataInfo name
 
-  (typeName, typeParams, constructors) <- getDataInfo name
+makeGTraversable :: Dec -> Q [Dec]
+makeGTraversable dec = deriveGTraversableByInfo $ getDataInfo dec
+
+deriveGTraversableByInfo :: (Name, [Name], [(Name, Int, [Type])]) -> Q [Dec]
+deriveGTraversableByInfo (typeName, typeParams, constructors) = do
+  ctx <- newName "c"
 
   let
     appliedType = foldl AppT (ConT typeName) $ map VarT typeParams
 
+    -- gtraverse = ...
+    body = funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ]
+    -- {-# INLINE gtraverse #-}
+    pragma = pragInlD 'gtraverse Inline FunLike AllPhases
+
     -- instance (...) => GTraversable ctx MyType where { ... }
     inst =
-      instanceD context (conT ''GTraversable `appT` varT ctx `appT` pure appliedType) [ do
-          -- gtraverse = ...
-          funD 'gtraverse [ clause [] (normalB $ gtraverseExpr typeName) [] ]
-        ]
+      instanceD context (conT ''GTraversable `appT` varT ctx `appT` pure appliedType)
+          [body, pragma]
 
     context = sequence userContext
 
@@ -109,7 +120,7 @@ conA (NormalC c xs)   = (c, length xs, map snd xs)
 conA (InfixC x1 c x2) = conA (NormalC c [x1, x2])
 conA (ForallC _ _ c)  = conA c
 conA (RecC c xs)      = (c, length xs, map (\(_,_,t)->t) xs)
-conA _ = err "GADTs are not supported yet"
+conA _                = err "GADTs are not supported yet"
 
 #if MIN_VERSION_template_haskell(2,17,0)
 varName :: TyVarBndr flag -> Name
@@ -117,6 +128,6 @@ varName (PlainTV n _) = n
 varName (KindedTV n _ _) = n
 #else
 varName :: TyVarBndr -> Name
-varName (PlainTV n) = n
+varName (PlainTV n)    = n
 varName (KindedTV n _) = n
 #endif
